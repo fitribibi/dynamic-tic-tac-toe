@@ -43,6 +43,156 @@ class Board {
         }
     }
 
+    public boolean isPlayerWin(Player player) {
+        if (preVerticalWin(player)) {
+            return true;
+        }
+
+        if (preHorizontalWin(player)) {
+            return true;
+        }
+
+        return preDiagonalWin(player);
+    }
+
+    // this method is used to check if the last player position has potential to win vertically,
+    // if the previous and after of last row index on the board has same player's symbol
+    // then scan one column of the board with column index = lastColIdx
+    private boolean preVerticalWin(Player player) {
+        boolean prevRow, afterRow;
+        if (lastRowIdx - 1 >= 0) {
+            prevRow = board[lastRowIdx - 1][lastColIdx] != null &&
+                    board[lastRowIdx - 1][lastColIdx].equals(player.name()) ? true : false;
+        } else {
+            prevRow = true;
+        }
+
+        if (lastRowIdx + 1 < n) {
+            afterRow = board[lastRowIdx + 1][lastColIdx] != null &&
+                    board[lastRowIdx + 1][lastColIdx].equals(player.name()) ? true : false;
+        } else {
+            afterRow = true;
+        }
+
+        if (prevRow && afterRow) {
+            return isVerticallyWin(player);
+        }
+        return false;
+    }
+
+    private boolean isVerticallyWin(Player player) {
+        for (int i = 0; i < n; i++) {
+            if (board[i][lastColIdx] == null || !board[i][lastColIdx].equals(player.name())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // this method is used to check if the last player position has potential to win horizontally,
+    // if the previous and after of last column index on the board has same player's symbol
+    // then scan one row of the board with row index = lastRowIdx
+    private boolean preHorizontalWin(Player player) {
+        boolean prevCol, afterCol;
+        if (lastColIdx - 1 >= 0) {
+            prevCol = board[lastRowIdx][lastColIdx - 1] != null &&
+                    board[lastRowIdx][lastColIdx - 1].equals(player.name()) ? true : false;
+        } else {
+            prevCol = true;
+        }
+
+        if (lastColIdx + 1 < n) {
+            afterCol = board[lastRowIdx][lastColIdx + 1] != null &&
+                    board[lastRowIdx][lastColIdx + 1].equals(player.name()) ? true : false;
+        } else {
+            afterCol = true;
+        }
+
+        if (prevCol && afterCol) {
+            return isHorizontallyWin(player);
+        }
+        return false;
+    }
+
+    private boolean isHorizontallyWin(Player player) {
+        for (int i = 0; i < n; i++) {
+            if (board[lastRowIdx][i] == null || !board[lastRowIdx][i].equals(player.name())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean preDiagonalWin(Player player) {
+        // Diagonal A is a top-left to bottom-right diagonal
+        // Diagonal B is a top-right to bottom-left diagonal
+        boolean prevDiagonalA, afterDiagonalA;
+        boolean prevDiagonalB, afterDiagonalB;
+
+        if (lastRowIdx == lastColIdx) {
+            if (lastRowIdx - 1 >= 0) {
+                prevDiagonalA = board[lastRowIdx - 1][lastColIdx - 1] != null &&
+                        board[lastRowIdx - 1][lastColIdx - 1].equals(player.name()) ? true : false;
+            } else {
+                prevDiagonalA = true;
+            }
+
+            if (lastRowIdx + 1 < n) {
+                afterDiagonalA = board[lastRowIdx + 1][lastColIdx + 1] != null &&
+                        board[lastRowIdx + 1][lastColIdx + 1].equals(player.name()) ? true : false;
+            } else {
+                afterDiagonalA = true;
+            }
+
+            if (prevDiagonalA && afterDiagonalA) {
+                return isADiagonallyWin(player);
+            }
+        }
+
+        if ((lastRowIdx + lastColIdx) == (n - 1)) {
+            if (lastRowIdx - 1 >= 0) {
+                prevDiagonalB = board[lastRowIdx - 1][lastColIdx + 1] != null &&
+                        board[lastRowIdx - 1][lastColIdx + 1].equals(player.name()) ? true : false;
+            } else {
+                prevDiagonalB = true;
+            }
+
+            if (lastRowIdx + 1 < n) {
+                afterDiagonalB = board[lastRowIdx + 1][lastColIdx - 1] != null &&
+                        board[lastRowIdx + 1][lastColIdx - 1].equals(player.name()) ? true : false;
+            } else {
+                afterDiagonalB = true;
+            }
+
+            if (prevDiagonalB && afterDiagonalB) {
+                return isBDiagonallyWin(player);
+            }
+        }
+        return false;
+    }
+
+    // Diagonal A is a top-left to bottom-right diagonal
+    private boolean isADiagonallyWin(Player player) {
+        for (int i = 0; i < n; i++) {
+            if (board[i][i] == null || !board[i][i].equals(player.name())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // Diagonal B is a top-right to bottom-left diagonal
+    private boolean isBDiagonallyWin(Player player) {
+        int j = 0;
+        for (int i = n - 1; i >= 0; i--) {
+            if (board[j][i] == null || !board[j][i].equals(player.name())) {
+                return false;
+            }
+            j++;
+        }
+        return true;
+    }
+
     public void printBoard() {
         System.out.println("Tic Tac Toe Board");
         System.out.println("(the number in each cell represent position)");
@@ -116,6 +266,10 @@ public class Main {
             if (pos >= 1 && pos <= maxCounter) {
                 if (board.placeThePlayer(player, pos)) {
                     board.printBoard();
+                    if (board.isPlayerWin(player)) {
+                        System.out.printf("player %s is win. The game is over!", player.name());
+                        break;
+                    }
                     counter++;
                 } else {
                     System.out.println("wrong number");
