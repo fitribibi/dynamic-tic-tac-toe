@@ -10,9 +10,37 @@ class Board {
     private int n;
     private String[][] board;
 
+    // this two below attributes are used to store the last player position
+    // and the attributes are set by method placeThePlayer() only
+    private int lastRowIdx;
+    private int lastColIdx;
+
     public Board(int n) {
         this.n = n;
         this.board = new String[n][n];
+    }
+
+    public boolean placeThePlayer(Player player, int position) {
+        int rowIdx, colIdx;
+        int divide = position / n;
+        int modulo = position % n;
+
+        if (modulo == 0) {
+            rowIdx = divide - 1;
+            colIdx = n - 1;
+        } else {
+            rowIdx = divide;
+            colIdx = modulo - 1;
+        }
+
+        if (board[rowIdx][colIdx] == null) {
+            board[rowIdx][colIdx] = player.name();
+            lastRowIdx = rowIdx;
+            lastColIdx = colIdx;
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public void printBoard() {
@@ -75,5 +103,32 @@ public class Main {
 
         Board board = new Board(n);
         board.printBoard();
+
+        int counter = 0;
+        int maxCounter = n * n;
+        int pos;
+
+        // the first turn is Player X
+        Player player = Player.X;
+        while (counter < maxCounter) {
+            System.out.printf("input position for player %s: ", player.name());
+            pos = scanner.nextInt();
+            if (pos >= 1 && pos <= maxCounter) {
+                if (board.placeThePlayer(player, pos)) {
+                    board.printBoard();
+                    counter++;
+                } else {
+                    System.out.println("wrong number");
+                }
+            } else {
+                System.out.println("wrong number");
+            }
+
+            if (player.name().equals(Player.X.name())) {
+                player = Player.O;
+            } else {
+                player = Player.X;
+            }
+        }
     }
 }
